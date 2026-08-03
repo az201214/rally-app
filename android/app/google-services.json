@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "878238233412",
+    "project_id": "rally-c6299",
+    "storage_bucket": "rally-c6299.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878238233412:android:ddb2bfe4bdf1e079df5d11",
+        "android_client_info": {
+          "package_name": "com.example.rally"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFa7z0RR5vdHEdhPW0KLtetppA8-a9RJY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

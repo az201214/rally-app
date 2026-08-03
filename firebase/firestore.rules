@@ -1,0 +1,121 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owner(field) { return signedIn() && field == request.auth.uid; }
+    function participant(data) { return signedIn() && request.auth.uid in data.participantIds; }
+    function unchanged(fields) { return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields); }
+    function changedOnly(fields) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields); }
+    function ownParticipantIndex(data) { return data.participants[0].userId == request.auth.uid ? 0 : 1; }
+    function otherParticipantIndex(data) { return data.participants[0].userId == request.auth.uid ? 1 : 0; }
+    function ownAcceptanceIsValid() {
+      let own = ownParticipantIndex(resource.data);
+      let other = otherParticipantIndex(resource.data);
+      return resource.data.participants.size() == 2
+             && request.resource.data.participants.size() == 2
+             && request.resource.data.participants[other] == resource.data.participants[other]
+             && request.resource.data.participants[own].diff(resource.data.participants[own]).affectedKeys().hasOnly(['acceptanceStatus', 'acceptedAt'])
+             && resource.data.participants[own].acceptanceStatus in ['pending', 'accepted']
+             && request.resource.data.participants[own].acceptanceStatus == 'accepted'
+             && (request.resource.data.status == 'awaitingAcceptance'
+                 || (request.resource.data.status == 'confirmed'
+                     && request.resource.data.participants[other].acceptanceStatus == 'accepted'));
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow create: if signedIn() && request.auth.uid == userId
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.email == request.auth.token.email;
+      allow update: if signedIn() && request.auth.uid == userId
+                    && unchanged(['uid', 'email', 'createdAt']);
+      allow delete: if false;
+    }
+
+    match /availability/{availabilityId} {
+      allow create: if owner(request.resource.data.userId)
+                    && request.resource.data.status == 'active';
+      allow read: if owner(resource.data.userId);
+      allow update: if owner(resource.data.userId)
+                    && unchanged(['id', 'userId'])
+                    && ((request.resource.data.status in ['cancelled', 'expired']
+                         && changedOnly(['status', 'updatedAt']))
+                        || ((resource.data.status in ['cancelled', 'expired']
+                             || resource.data.expiresAt <= request.time)
+                            && request.resource.data.status == 'active'))
+                    || (signedIn()
+                        && resource.data.id == 'availability_' + resource.data.userId
+                        && request.resource.data.status in ['cancelled', 'expired']
+                        && changedOnly(['status', 'updatedAt'])
+                        && participant(get(/databases/$(database)/documents/matches/$(get(/databases/$(database)/documents/matchRequests/request_$(resource.data.userId)).data.matchedMatchId)).data));
+      allow delete: if false;
+    }
+
+    match /matchRequests/{requestId} {
+      allow create: if owner(request.resource.data.userId)
+                    && request.resource.data.status == 'searching'
+                    && request.resource.data.matchedMatchId == '';
+      // Searching request documents contain matchmaking attributes only. This
+      // read is required by the client MVP; move candidate selection server-side
+      // before adding private request fields.
+      allow read: if signedIn() && (owner(resource.data.userId)
+                    || resource.data.status == 'searching');
+      allow update: if signedIn()
+                    && unchanged(['id', 'userId', 'availabilityId'])
+                    && ((owner(resource.data.userId)
+                         && resource.data.status == 'searching'
+                         && request.resource.data.status in ['cancelled', 'expired']
+                         && changedOnly(['status', 'updatedAt']))
+                        || (resource.data.status == 'searching'
+                            && request.resource.data.status == 'matched'
+                            && request.resource.data.matchedMatchId is string
+                            && changedOnly(['status', 'matchedMatchId', 'updatedAt', 'expiresAt'])
+                            && participant(getAfter(/databases/$(database)/documents/matches/$(request.resource.data.matchedMatchId)).data))
+                        || (resource.data.status == 'matched'
+                            && request.resource.data.status in ['cancelled', 'expired']
+                            && changedOnly(['status', 'updatedAt'])
+                            && participant(get(/databases/$(database)/documents/matches/$(resource.data.matchedMatchId)).data))
+                        || (owner(resource.data.userId)
+                            && (resource.data.status in ['cancelled', 'expired']
+                                || resource.data.expiresAt <= request.time)
+                            && request.resource.data.status == 'searching'
+                            && changedOnly(['status', 'matchedMatchId', 'updatedAt', 'expiresAt', 'createdAt',
+                              'city', 'latitude', 'longitude', 'searchRadiusKm', 'availableFrom',
+                              'availableUntil', 'skillLevel', 'preferredSide', 'preferredClubIds',
+                              'reliabilityScore', 'displayName', 'photoUrl'])));
+      allow delete: if false;
+    }
+
+    match /matches/{matchId} {
+      allow read: if participant(resource.data);
+      allow create: if participant(request.resource.data)
+                    && request.resource.data.participantIds.size() == 2
+                    && request.resource.data.participants.size() == 2
+                    && request.resource.data.participants[0].userId == request.resource.data.participantIds[0]
+                    && request.resource.data.participants[1].userId == request.resource.data.participantIds[1]
+                    && request.resource.data.status == 'awaitingAcceptance'
+                    && request.resource.data.createdBy == request.auth.uid;
+      // Immutable formation fields cannot be edited. A participant may mutate
+      // acceptance/lifecycle fields; the two-player array shape is fixed.
+      allow update: if participant(resource.data)
+                    && unchanged(['id', 'participantIds', 'city', 'clubId',
+                      'clubName', 'scheduledStart', 'scheduledEnd',
+                      'compatibilityScore', 'compatibilityReasons', 'createdBy',
+                      'createdAt', 'expiresAt'])
+                    && ((ownAcceptanceIsValid()
+                         && changedOnly(['participants', 'status', 'updatedAt', 'confirmedAt']))
+                        || (request.resource.data.participants == resource.data.participants
+                            && request.resource.data.status in ['declined', 'cancelled', 'expired']
+                            && changedOnly(['status', 'cancellationReason', 'cancelledAt', 'updatedAt'])));
+      allow delete: if false;
+
+      match /events/{eventId} {
+        allow read: if participant(get(/databases/$(database)/documents/matches/$(matchId)).data);
+        allow create: if participant(getAfter(/databases/$(database)/documents/matches/$(matchId)).data)
+                      && request.resource.data.actorId == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+  }
+}
