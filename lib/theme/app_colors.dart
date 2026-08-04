@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
+  static const Color carbonBlack = Color(0xFF0B0D10);
+  static const Color electricGreen = Color(0xFF7CFF4F);
   static const Color accentPrimary = Color(0xFF2DFF6C);
   static const Color accentSecondary = Color(0xFF84FFB7);
   static const Color accentTertiary = Color(0xFF0D5C2B);

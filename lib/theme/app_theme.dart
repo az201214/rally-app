@@ -52,7 +52,10 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: AppRadius.medium,
-        borderSide: const BorderSide(color: AppColors.accentPrimary, width: 1.5),
+        borderSide: const BorderSide(
+          color: AppColors.accentPrimary,
+          width: 1.5,
+        ),
       ),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -96,12 +99,18 @@ class AppTheme {
       indicatorColor: AppColors.accentPrimary.withValues(alpha: 0.16),
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         return states.contains(WidgetState.selected)
-            ? AppTypography.darkTextTheme.labelMedium?.copyWith(color: AppColors.accentPrimary)
-            : AppTypography.darkTextTheme.labelMedium?.copyWith(color: AppColors.textSecondary);
+            ? AppTypography.darkTextTheme.labelMedium?.copyWith(
+                color: AppColors.accentPrimary,
+              )
+            : AppTypography.darkTextTheme.labelMedium?.copyWith(
+                color: AppColors.textSecondary,
+              );
       }),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         return IconThemeData(
-          color: states.contains(WidgetState.selected) ? AppColors.accentPrimary : AppColors.textSecondary,
+          color: states.contains(WidgetState.selected)
+              ? AppColors.accentPrimary
+              : AppColors.textSecondary,
         );
       }),
     ),
@@ -159,7 +168,10 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: AppRadius.medium,
-        borderSide: const BorderSide(color: AppColors.accentPrimary, width: 1.5),
+        borderSide: const BorderSide(
+          color: AppColors.accentPrimary,
+          width: 1.5,
+        ),
       ),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -203,12 +215,18 @@ class AppTheme {
       indicatorColor: AppColors.accentPrimary.withValues(alpha: 0.14),
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         return states.contains(WidgetState.selected)
-            ? AppTypography.lightTextTheme.labelMedium?.copyWith(color: AppColors.accentPrimary)
-            : AppTypography.lightTextTheme.labelMedium?.copyWith(color: AppColors.textSecondaryLight);
+            ? AppTypography.lightTextTheme.labelMedium?.copyWith(
+                color: AppColors.accentPrimary,
+              )
+            : AppTypography.lightTextTheme.labelMedium?.copyWith(
+                color: AppColors.textSecondaryLight,
+              );
       }),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         return IconThemeData(
-          color: states.contains(WidgetState.selected) ? AppColors.accentPrimary : AppColors.textSecondaryLight,
+          color: states.contains(WidgetState.selected)
+              ? AppColors.accentPrimary
+              : AppColors.textSecondaryLight,
         );
       }),
     ),
