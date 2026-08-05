@@ -12,15 +12,15 @@ import '../../../matchmaking/application/matchmaking_controller.dart';
 import '../../../matchmaking/domain/matchmaking_models.dart';
 
 class MatchDetailsScreen extends ConsumerWidget {
-  const MatchDetailsScreen({super.key});
+  const MatchDetailsScreen({super.key, this.match});
+
+  final RallyMatch? match;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final match = ref.watch(matchmakingControllerProvider).match;
+    final match = this.match ?? ref.watch(matchmakingControllerProvider).match;
     final chatEnabled =
-        DemoMode.enabled ||
-        match == null ||
-        match.status == RallyMatchStatus.confirmed;
+        DemoMode.enabled || match?.status == RallyMatchStatus.confirmed;
     return Scaffold(
       backgroundColor: AppColors.carbonBlack,
       body: SafeArea(

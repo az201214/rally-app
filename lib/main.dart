@@ -1,18 +1,29 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/rally_app.dart';
 import 'demo/demo_matchmaking_repositories.dart';
+import 'demo/demo_chat_repository.dart';
 import 'demo/demo_mode.dart';
 import 'demo/demo_repositories.dart';
 import 'features/authentication/application/auth_providers.dart';
+import 'features/chat/application/chat_providers.dart';
 import 'features/matchmaking/application/matchmaking_controller.dart';
 import 'firebase_options.dart';
 import 'theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (kDebugMode) {
+    debugPrint(
+      <String, Object>{
+        'scope': 'rally_boot',
+        'demoMode': DemoMode.enabled,
+      }.toString(),
+    );
+  }
   if (DemoMode.enabled) {
     runApp(
       ProviderScope(
@@ -27,6 +38,7 @@ Future<void> main() async {
           matchmakingRepositoryProvider.overrideWithValue(
             DemoMatchmakingRepository(),
           ),
+          chatRepositoryProvider.overrideWithValue(DemoChatRepository()),
         ],
         child: const RallyApp(),
       ),

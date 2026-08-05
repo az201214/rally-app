@@ -9,6 +9,9 @@ service cloud.firestore {
     function changedOnly(fields) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields); }
     function ownParticipantIndex(data) { return data.participants[0].userId == request.auth.uid ? 0 : 1; }
     function otherParticipantIndex(data) { return data.participants[0].userId == request.auth.uid ? 1 : 0; }
+    function requestForUser(userId) {
+      return get(/databases/$(database)/documents/matchRequests/$("request_" + userId));
+    }
     function ownAcceptanceIsValid() {
       let own = ownParticipantIndex(resource.data);
       let other = otherParticipantIndex(resource.data);
@@ -48,7 +51,7 @@ service cloud.firestore {
                         && resource.data.id == 'availability_' + resource.data.userId
                         && request.resource.data.status in ['cancelled', 'expired']
                         && changedOnly(['status', 'updatedAt'])
-                        && participant(get(/databases/$(database)/documents/matches/$(get(/databases/$(database)/documents/matchRequests/request_$(resource.data.userId)).data.matchedMatchId)).data));
+                        && participant(get(/databases/$(database)/documents/matches/$(requestForUser(resource.data.userId).data.matchedMatchId)).data));
       allow delete: if false;
     }
 
@@ -115,6 +118,60 @@ service cloud.firestore {
         allow create: if participant(getAfter(/databases/$(database)/documents/matches/$(matchId)).data)
                       && request.resource.data.actorId == request.auth.uid;
         allow update, delete: if false;
+      }
+    }
+
+    match /chatThreads/{threadId} {
+      function linkedMatch(data) {
+        return get(/databases/$(database)/documents/matches/$(data.matchId));
+      }
+      function confirmedParticipant(data) {
+        return signedIn()
+               && data.participantIds.hasAll([request.auth.uid])
+               && linkedMatch(data).data.status == 'confirmed'
+               && linkedMatch(data).data.participantIds == data.participantIds;
+      }
+
+      allow read: if participant(resource.data);
+      allow create: if threadId == 'thread_' + request.resource.data.matchId
+                    && request.resource.data.id == threadId
+                    && request.resource.data.participantIds.size() == 2
+                    && confirmedParticipant(request.resource.data)
+                    && request.resource.data.createdAt is timestamp
+                    && request.resource.data.updatedAt is timestamp;
+      allow update: if participant(resource.data)
+                    && unchanged(['id', 'matchId', 'participantIds', 'createdAt'])
+                    && changedOnly(['lastMessageText', 'lastMessageAt',
+                      'lastMessageSenderId', 'updatedAt'])
+                    && request.resource.data.lastMessageSenderId == request.auth.uid;
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        function thread() {
+          return get(/databases/$(database)/documents/chatThreads/$(threadId));
+        }
+        function inThread() { return participant(thread().data); }
+
+        allow read: if inThread();
+        allow create: if inThread()
+                      && request.resource.data.id == messageId
+                      && request.resource.data.threadId == threadId
+                      && request.resource.data.matchId == thread().data.matchId
+                      && request.resource.data.senderId == request.auth.uid
+                      && request.resource.data.type in ['text', 'system']
+                      && request.resource.data.status == 'sent'
+                      && request.resource.data.createdAt is timestamp
+                      && request.resource.data.createdAt <= request.time
+                      && request.resource.data.readBy.hasAll([request.auth.uid]);
+        allow update: if inThread()
+                      && unchanged(['id', 'threadId', 'matchId', 'senderId',
+                        'senderName', 'senderPhotoUrl', 'type', 'createdAt', 'status'])
+                      && ((resource.data.senderId == request.auth.uid
+                           && changedOnly(['text', 'editedAt', 'deletedAt']))
+                          || (changedOnly(['readBy'])
+                              && request.resource.data.readBy.hasAll(resource.data.readBy)
+                              && request.resource.data.readBy.hasAll([request.auth.uid])));
+        allow delete: if false;
       }
     }
   }

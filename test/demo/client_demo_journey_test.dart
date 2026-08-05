@@ -5,11 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:rally/features/authentication/application/auth_providers.dart';
 import 'package:rally/features/authentication/domain/auth_user.dart';
 import 'package:rally/demo/demo_matchmaking_repositories.dart';
+import 'package:rally/demo/demo_chat_repository.dart';
+import 'package:rally/features/chat/application/chat_providers.dart';
 import 'package:rally/features/chat/presentation/screens/match_chat_screen.dart';
 import 'package:rally/features/clubs/presentation/screens/club_details_screen.dart';
 import 'package:rally/features/match/presentation/screens/match_details_screen.dart';
 import 'package:rally/features/match/presentation/screens/match_found_screen.dart';
 import 'package:rally/features/matchmaking/application/matchmaking_controller.dart';
+import 'package:rally/features/matchmaking/domain/matchmaking_models.dart';
 import 'package:rally/features/profile/presentation/screens/player_profile_screen.dart';
 import 'package:rally/features/searching/presentation/screens/searching_screen.dart';
 import 'package:rally/theme/app_theme.dart';
@@ -37,11 +40,11 @@ void main() {
         ),
         GoRoute(
           path: '/match-details',
-          builder: (_, _) => const MatchDetailsScreen(),
+          builder: (_, _) => MatchDetailsScreen(match: _confirmedMatch()),
         ),
         GoRoute(
           path: '/match-chat',
-          builder: (_, _) => const MatchChatScreen(),
+          builder: (_, _) => MatchChatScreen(match: _confirmedMatch()),
         ),
         GoRoute(
           path: '/player-profile',
@@ -74,6 +77,7 @@ void main() {
           matchmakingRepositoryProvider.overrideWithValue(
             DemoMatchmakingRepository(),
           ),
+          chatRepositoryProvider.overrideWithValue(DemoChatRepository()),
         ],
         child: MaterialApp.router(
           theme: AppTheme.darkTheme,
@@ -106,7 +110,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Hamza Khan'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.person_search_rounded));
+    await tester.tap(find.byKey(const Key('chat-profile-button')));
     await tester.pumpAndSettle();
     expect(find.text('HAMZA KHAN'), findsOneWidget);
 
@@ -119,4 +123,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('PADELVERSE'), findsOneWidget);
   });
+}
+
+RallyMatch _confirmedMatch() {
+  final now = DateTime.utc(2026, 8, 5, 10);
+  return RallyMatch(
+    id: 'demo-match',
+    participantIds: const <String>['user-1', 'user-2'],
+    participants: const <MatchParticipant>[],
+    city: 'Karachi',
+    clubId: 'padelverse-clifton',
+    clubName: 'Padelverse Clifton',
+    scheduledStart: now,
+    scheduledEnd: now.add(const Duration(minutes: 90)),
+    status: RallyMatchStatus.confirmed,
+    compatibilityScore: 94,
+    compatibilityReasons: const <String>['Overlapping availability'],
+    createdBy: 'user-1',
+    createdAt: now,
+    updatedAt: now,
+    expiresAt: now.add(const Duration(hours: 1)),
+    confirmedAt: now,
+    cancellationReason: '',
+  );
 }
