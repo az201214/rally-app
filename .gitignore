@@ -33,6 +33,10 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Local browser automation and engineering handoff output
+/.verification/
+/artifacts/engineering_handoff/
+
 # Symbolication related
 app.*.symbols
 

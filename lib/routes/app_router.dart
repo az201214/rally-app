@@ -22,6 +22,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier<int>(0);
   ref
     ..listen(authStateProvider, (_, _) => refresh.value++)
+    ..listen(authActionControllerProvider, (_, _) => refresh.value++)
     ..onDispose(refresh.dispose);
   final router = GoRouter(
     initialLocation: AppRoutes.splash,
@@ -33,6 +34,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return location == AppRoutes.splash ? null : AppRoutes.splash;
       }
       final user = auth.value;
+      final authAction = ref.read(authActionControllerProvider);
       final publicRoutes = <String>{
         AppRoutes.splash,
         AppRoutes.onboarding,
@@ -47,6 +49,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (user != null &&
           publicRoutes.contains(location) &&
           location != AppRoutes.splash) {
+        if (authAction.isLoading) return null;
         return AppRoutes.home;
       }
       return null;

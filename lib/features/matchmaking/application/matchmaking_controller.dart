@@ -173,9 +173,6 @@ class MatchmakingController extends Notifier<MatchmakingState> {
         updatedAt: now,
         expiresAt: availableUntil.toUtc(),
       );
-      await ref
-          .read(availabilityRepositoryProvider)
-          .createAvailability(availability);
       final request = MatchRequest(
         id: 'request_${user.uid}',
         userId: user.uid,

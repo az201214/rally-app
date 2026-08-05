@@ -29,30 +29,30 @@ class FirestoreChatRepository implements ChatRepository {
     }
     final threadId = chatThreadIdForMatch(match.id);
     final reference = _threads.doc(threadId);
-    _log('thread_transaction', threadId: threadId, matchId: match.id);
-    return _firestore
-        .runTransaction((transaction) async {
-          final snapshot = await transaction.get(reference);
-          if (snapshot.exists) {
-            return ChatThread.fromMap(snapshot.data()!, id: snapshot.id);
-          }
-          final now = DateTime.now().toUtc();
-          final thread = ChatThread(
-            id: threadId,
-            matchId: match.id,
-            participantIds: List<String>.unmodifiable(match.participantIds),
-            createdAt: now,
-            updatedAt: now,
-            lastMessageText: '',
-            lastMessageSenderId: '',
-          );
-          transaction.set(reference, thread.toMap());
-          return thread;
-        })
-        .onError((error, stackTrace) {
-          _log('thread_transaction_failed', threadId: threadId, error: error);
-          throw error!;
-        });
+    _log('thread_create', threadId: threadId, matchId: match.id);
+    final createdAt = match.confirmedAt ?? match.createdAt;
+    final thread = ChatThread(
+      id: threadId,
+      matchId: match.id,
+      participantIds: List<String>.unmodifiable(match.participantIds),
+      createdAt: createdAt,
+      updatedAt: createdAt,
+      lastMessageText: '',
+      lastMessageSenderId: '',
+    );
+    try {
+      await reference.set(<String, Object?>{
+        'id': thread.id,
+        'matchId': thread.matchId,
+        'participantIds': thread.participantIds,
+        'createdAt': thread.createdAt,
+        'updatedAt': thread.updatedAt,
+      }, SetOptions(merge: true));
+      return thread;
+    } catch (error) {
+      _log('thread_create_failed', threadId: threadId, error: error);
+      rethrow;
+    }
   }
 
   @override

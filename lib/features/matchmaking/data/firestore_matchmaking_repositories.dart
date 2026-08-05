@@ -197,10 +197,6 @@ class FirestoreMatchmakingRepository implements MatchmakingRepository {
       final matchRef = _matches.doc(matchId);
       final ownSnapshot = await transaction.get(ownRef);
       final candidateSnapshot = await transaction.get(candidateRef);
-      final existingMatch = await transaction.get(matchRef);
-      if (existingMatch.exists) {
-        return RallyMatch.fromMap(existingMatch.data()!, id: matchId);
-      }
       if (!ownSnapshot.exists || !candidateSnapshot.exists) return null;
       final currentOwn = MatchRequest.fromMap(ownSnapshot.data()!, id: own.id);
       final currentCandidate = MatchRequest.fromMap(

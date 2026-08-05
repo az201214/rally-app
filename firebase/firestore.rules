@@ -39,7 +39,9 @@ service cloud.firestore {
     match /availability/{availabilityId} {
       allow create: if owner(request.resource.data.userId)
                     && request.resource.data.status == 'active';
-      allow read: if owner(resource.data.userId);
+      allow read: if signedIn()
+                  && (availabilityId == 'availability_' + request.auth.uid
+                      || owner(resource.data.userId));
       allow update: if owner(resource.data.userId)
                     && unchanged(['id', 'userId'])
                     && ((request.resource.data.status in ['cancelled', 'expired']
@@ -62,8 +64,10 @@ service cloud.firestore {
       // Searching request documents contain matchmaking attributes only. This
       // read is required by the client MVP; move candidate selection server-side
       // before adding private request fields.
-      allow read: if signedIn() && (owner(resource.data.userId)
-                    || resource.data.status == 'searching');
+      allow read: if signedIn()
+                  && (requestId == 'request_' + request.auth.uid
+                      || owner(resource.data.userId)
+                      || resource.data.status == 'searching');
       allow update: if signedIn()
                     && unchanged(['id', 'userId', 'availabilityId'])
                     && ((owner(resource.data.userId)
@@ -141,9 +145,10 @@ service cloud.firestore {
                     && request.resource.data.updatedAt is timestamp;
       allow update: if participant(resource.data)
                     && unchanged(['id', 'matchId', 'participantIds', 'createdAt'])
-                    && changedOnly(['lastMessageText', 'lastMessageAt',
-                      'lastMessageSenderId', 'updatedAt'])
-                    && request.resource.data.lastMessageSenderId == request.auth.uid;
+                    && (request.resource.data == resource.data
+                        || (changedOnly(['lastMessageText', 'lastMessageAt',
+                              'lastMessageSenderId', 'updatedAt'])
+                            && request.resource.data.lastMessageSenderId == request.auth.uid));
       allow delete: if false;
 
       match /messages/{messageId} {
