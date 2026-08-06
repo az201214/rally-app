@@ -9,6 +9,7 @@ import '../features/authentication/presentation/screens/register_screen.dart';
 import '../features/authentication/presentation/screens/verify_otp_screen.dart';
 import '../features/chat/presentation/screens/match_chat_screen.dart';
 import '../features/clubs/presentation/screens/club_details_screen.dart';
+import '../features/clubs/presentation/screens/club_discovery_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/match/presentation/screens/match_details_screen.dart';
 import '../features/match/presentation/screens/match_found_screen.dart';
@@ -140,8 +141,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const PlayerProfileScreen(),
       ),
       GoRoute(
+        path: AppRoutes.clubs,
+        builder: (context, state) => const ClubDiscoveryScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.clubDetails,
-        builder: (context, state) => const ClubDetailsScreen(),
+        builder: (context, state) => ClubDetailsScreen(
+          clubId: state.uri.queryParameters['id'] ?? 'padelverse-clifton',
+        ),
       ),
       GoRoute(
         path: AppRoutes.searching,

@@ -77,7 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
     if (destination == HomeDestination.discover) {
-      context.push(AppRoutes.clubDetails);
+      context.push(AppRoutes.clubs);
       return;
     }
     if (destination == HomeDestination.matches) {
@@ -138,7 +138,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         const SizedBox(height: AppSpacing.xl),
                         QuickActionsSection(
                           onPlay: _openMatchSearchSheet,
-                          onClubs: () => context.push(AppRoutes.clubDetails),
+                          onClubs: () => context.push(AppRoutes.clubs),
                           onProfile: () =>
                               context.push(AppRoutes.playerProfile),
                         ),

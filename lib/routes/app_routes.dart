@@ -12,5 +12,6 @@ abstract final class AppRoutes {
   static const String matchDetails = '/match-details';
   static const String matchChat = '/match-chat';
   static const String playerProfile = '/player-profile';
+  static const String clubs = '/clubs';
   static const String clubDetails = '/club-details';
 }

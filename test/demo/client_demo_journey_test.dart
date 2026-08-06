@@ -9,6 +9,8 @@ import 'package:rally/demo/demo_chat_repository.dart';
 import 'package:rally/features/chat/application/chat_providers.dart';
 import 'package:rally/features/chat/presentation/screens/match_chat_screen.dart';
 import 'package:rally/features/clubs/presentation/screens/club_details_screen.dart';
+import 'package:rally/features/clubs/application/club_providers.dart';
+import 'package:rally/features/clubs/data/demo_club_repository.dart';
 import 'package:rally/features/match/presentation/screens/match_details_screen.dart';
 import 'package:rally/features/match/presentation/screens/match_found_screen.dart';
 import 'package:rally/features/matchmaking/application/matchmaking_controller.dart';
@@ -78,6 +80,10 @@ void main() {
             DemoMatchmakingRepository(),
           ),
           chatRepositoryProvider.overrideWithValue(DemoChatRepository()),
+          clubRepositoryProvider.overrideWithValue(DemoClubRepository()),
+          clubLocationServiceProvider.overrideWithValue(
+            DemoClubLocationService(),
+          ),
         ],
         child: MaterialApp.router(
           theme: AppTheme.darkTheme,

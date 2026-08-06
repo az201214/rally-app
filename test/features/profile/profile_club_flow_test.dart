@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rally/features/clubs/presentation/screens/club_details_screen.dart';
+import 'package:rally/features/clubs/application/club_providers.dart';
+import 'package:rally/features/clubs/data/demo_club_repository.dart';
 import 'package:rally/features/profile/presentation/screens/player_profile_screen.dart';
 import 'package:rally/features/authentication/application/auth_providers.dart';
 import 'package:rally/features/authentication/domain/auth_user.dart';
@@ -46,6 +48,10 @@ void main() {
       overrides: [
         authRepositoryProvider.overrideWithValue(auth),
         playerProfileRepositoryProvider.overrideWithValue(profiles),
+        clubRepositoryProvider.overrideWithValue(DemoClubRepository()),
+        clubLocationServiceProvider.overrideWithValue(
+          DemoClubLocationService(),
+        ),
       ],
       child: MaterialApp.router(
         theme: AppTheme.darkTheme,

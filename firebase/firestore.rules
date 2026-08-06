@@ -34,6 +34,28 @@ service cloud.firestore {
       allow update: if signedIn() && request.auth.uid == userId
                     && unchanged(['uid', 'email', 'createdAt']);
       allow delete: if false;
+
+      match /deviceTokens/{tokenId} {
+        function validToken() {
+          return request.resource.data.id == tokenId
+                 && request.resource.data.userId == userId
+                 && request.resource.data.token is string
+                 && request.resource.data.token.size() > 20
+                 && request.resource.data.platform in ['android', 'ios', 'web']
+                 && request.resource.data.enabled == true;
+        }
+        allow read: if signedIn() && request.auth.uid == userId;
+        allow create: if signedIn() && request.auth.uid == userId && validToken();
+        allow update: if signedIn() && request.auth.uid == userId
+                      && validToken()
+                      && unchanged(['id', 'userId', 'token', 'createdAt']);
+        allow delete: if signedIn() && request.auth.uid == userId;
+      }
+    }
+
+    match /clubs/{clubId} {
+      allow read: if signedIn();
+      allow write: if false;
     }
 
     match /availability/{availabilityId} {
