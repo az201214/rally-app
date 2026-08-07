@@ -33,6 +33,11 @@ class AppTheme {
     dividerColor: AppColors.borderSubtle,
     textTheme: AppTypography.darkTextTheme,
     fontFamily: GoogleFonts.inter().fontFamily,
+    visualDensity: VisualDensity.standard,
+    splashFactory: InkSparkle.splashFactory,
+    focusColor: AppColors.accentPrimary.withValues(alpha: 0.22),
+    hoverColor: AppColors.textPrimary.withValues(alpha: 0.05),
+    highlightColor: AppColors.textPrimary.withValues(alpha: 0.07),
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.surfacePrimary,
       foregroundColor: AppColors.textPrimary,
@@ -57,6 +62,18 @@ class AppTheme {
           width: 1.5,
         ),
       ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: AppRadius.medium,
+        borderSide: const BorderSide(color: AppColors.error),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: AppRadius.medium,
+        borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+      ),
+      labelStyle: const TextStyle(color: AppColors.textSecondary),
+      floatingLabelStyle: const TextStyle(color: AppColors.accentSecondary),
+      helperStyle: const TextStyle(color: AppColors.textTertiary),
+      errorStyle: const TextStyle(color: AppColors.error, height: 1.35),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
@@ -69,6 +86,8 @@ class AppTheme {
         padding: AppSpacing.buttonPadding,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
         elevation: 0,
+        minimumSize: const Size(48, 52),
+        overlayColor: AppColors.textInverse.withValues(alpha: 0.08),
         textStyle: AppTypography.darkTextTheme.labelLarge,
       ),
     ),
@@ -79,6 +98,32 @@ class AppTheme {
         padding: AppSpacing.buttonPadding,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
         textStyle: AppTypography.darkTextTheme.labelLarge,
+        minimumSize: const Size(48, 52),
+      ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.accentPrimary,
+        foregroundColor: AppColors.textInverse,
+        minimumSize: const Size(48, 52),
+        padding: AppSpacing.buttonPadding,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
+        textStyle: AppTypography.darkTextTheme.labelLarge,
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.accentSecondary,
+        minimumSize: const Size(48, 48),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
+        textStyle: AppTypography.darkTextTheme.labelLarge,
+      ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        foregroundColor: AppColors.textSecondary,
+        minimumSize: const Size.square(48),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
       ),
     ),
     cardTheme: CardThemeData(
@@ -113,6 +158,45 @@ class AppTheme {
               : AppColors.textSecondary,
         );
       }),
+      height: 80,
+      elevation: 0,
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.surfaceElevated,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.large,
+        side: const BorderSide(color: AppColors.borderStrong),
+      ),
+      titleTextStyle: AppTypography.darkTextTheme.titleLarge,
+      contentTextStyle: AppTypography.darkTextTheme.bodyMedium,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: AppColors.surfaceGlass,
+      contentTextStyle: AppTypography.darkTextTheme.bodyMedium?.copyWith(
+        color: AppColors.textPrimary,
+      ),
+      behavior: SnackBarBehavior.floating,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.medium,
+        side: const BorderSide(color: AppColors.borderStrong),
+      ),
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: AppColors.accentPrimary,
+      linearTrackColor: AppColors.borderSubtle,
+      circularTrackColor: AppColors.borderSubtle,
+    ),
+    tooltipTheme: TooltipThemeData(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceElevated,
+        borderRadius: AppRadius.small,
+        border: Border.all(color: AppColors.borderStrong),
+      ),
+      textStyle: AppTypography.darkTextTheme.labelMedium?.copyWith(
+        color: AppColors.textPrimary,
+      ),
     ),
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: AppColors.surfaceSecondary,

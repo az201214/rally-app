@@ -86,12 +86,13 @@ class _SplashScreenState extends State<SplashScreen>
             right: 0,
             bottom: AppSpacing.xl,
             child: Center(
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.electricGreen,
+              child: Text(
+                'KARACHI  ·  PADEL MATCHMAKING',
+                style: TextStyle(
+                  color: AppColors.textTertiary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.4,
                 ),
               ),
             ),

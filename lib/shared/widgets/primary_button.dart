@@ -23,22 +23,27 @@ class PrimaryButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final callback = isLoading ? null : onPressed;
 
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: callback,
-        child: isLoading
-            ? LoadingIndicator.small(color: colorScheme.onPrimary)
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  if (icon != null) ...<Widget>[
-                    Icon(icon),
-                    const SizedBox(width: AppSpacing.xs),
+    return Semantics(
+      button: true,
+      label: label,
+      enabled: callback != null,
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: callback,
+          child: isLoading
+              ? LoadingIndicator.small(color: colorScheme.onPrimary)
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (icon != null) ...<Widget>[
+                      Icon(icon),
+                      const SizedBox(width: AppSpacing.xs),
+                    ],
+                    Text(label),
                   ],
-                  Text(label),
-                ],
-              ),
+                ),
+        ),
       ),
     );
   }
