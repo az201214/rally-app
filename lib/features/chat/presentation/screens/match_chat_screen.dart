@@ -65,7 +65,10 @@ class _MatchChatScreenState extends ConsumerState<MatchChatScreen> {
             constraints: const BoxConstraints(maxWidth: 720),
             child: Column(
               children: <Widget>[
-                const _ChatHeader(),
+                _ChatHeader(
+                  match: match,
+                  currentUserId: ref.watch(authStateProvider).value?.uid ?? '',
+                ),
                 const _MatchContextStrip(),
                 Expanded(child: _conversation(thread)),
                 if (thread.value != null) ...<Widget>[
@@ -204,57 +207,69 @@ class _MatchChatScreenState extends ConsumerState<MatchChatScreen> {
 }
 
 class _ChatHeader extends StatelessWidget {
-  const _ChatHeader();
+  const _ChatHeader({required this.match, required this.currentUserId});
+
+  final RallyMatch match;
+  final String currentUserId;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.md,
-      vertical: AppSpacing.sm,
-    ),
-    child: Row(
-      children: <Widget>[
-        IconButton.filledTonal(
-          onPressed: () => context.canPop()
-              ? context.pop()
-              : context.go(AppRoutes.matchDetails),
-          tooltip: 'Back to match details',
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        const CircleAvatar(child: Icon(Icons.person_rounded)),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Hamza Khan',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const Text(
-                'Match confirmed · Live',
-                style: TextStyle(
-                  color: AppColors.electricGreen,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+  Widget build(BuildContext context) {
+    final other = match.participants
+        .where((participant) => participant.userId != currentUserId)
+        .firstOrNull;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: <Widget>[
+          IconButton.filledTonal(
+            onPressed: () => context.canPop()
+                ? context.pop()
+                : context.go(AppRoutes.matchDetails),
+            tooltip: 'Back to match details',
+            icon: const Icon(Icons.arrow_back_rounded),
           ),
-        ),
-        IconButton(
-          key: const Key('chat-profile-button'),
-          onPressed: () => context.push(AppRoutes.playerProfile),
-          tooltip: 'View player profile',
-          icon: const Icon(Icons.person_search_rounded),
-        ),
-      ],
-    ),
-  );
+          const SizedBox(width: AppSpacing.sm),
+          const CircleAvatar(child: Icon(Icons.person_rounded)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  other?.displayName ?? 'Hamza Khan',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Text(
+                  'Match confirmed · Live',
+                  style: TextStyle(
+                    color: AppColors.electricGreen,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            key: const Key('chat-profile-button'),
+            onPressed: () => context.push(
+              other == null
+                  ? AppRoutes.playerProfile
+                  : '${AppRoutes.playerProfile}?uid=${other.userId}',
+            ),
+            tooltip: 'View player profile',
+            icon: const Icon(Icons.person_search_rounded),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _MatchContextStrip extends StatelessWidget {

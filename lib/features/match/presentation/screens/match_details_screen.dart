@@ -10,6 +10,7 @@ import '../../../../theme/app_radius.dart';
 import '../../../../theme/app_spacing.dart';
 import '../../../matchmaking/application/matchmaking_controller.dart';
 import '../../../matchmaking/domain/matchmaking_models.dart';
+import '../../../authentication/application/auth_providers.dart';
 
 class MatchDetailsScreen extends ConsumerWidget {
   const MatchDetailsScreen({super.key, this.match});
@@ -94,7 +95,10 @@ class MatchDetailsScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      const _PlayersCard(),
+                      _PlayersCard(
+                        match: match,
+                        currentUserId: ref.watch(authStateProvider).value?.uid,
+                      ),
                       const SizedBox(height: AppSpacing.md),
                       const _MatchPlanCard(),
                       const SizedBox(height: AppSpacing.lg),
@@ -321,10 +325,16 @@ class _VenueCard extends StatelessWidget {
 }
 
 class _PlayersCard extends StatelessWidget {
-  const _PlayersCard();
+  const _PlayersCard({this.match, this.currentUserId});
+
+  final RallyMatch? match;
+  final String? currentUserId;
 
   @override
   Widget build(BuildContext context) {
+    final other = match?.participants
+        .where((participant) => participant.userId != currentUserId)
+        .firstOrNull;
     return _SectionCard(
       title: 'PLAYERS',
       child: Column(
@@ -336,9 +346,14 @@ class _PlayersCard extends StatelessWidget {
           ),
           const Divider(height: AppSpacing.lg),
           _PlayerRow(
-            name: 'Hamza Khan',
-            detail: 'Advanced · Right side',
-            onTap: () => context.push(AppRoutes.playerProfile),
+            name: other?.displayName ?? 'Rally player',
+            detail:
+                '${other?.skillLevel ?? 'Player'} · ${other?.preferredSide ?? 'No preference'}',
+            onTap: other == null
+                ? null
+                : () => context.push(
+                    '${AppRoutes.playerProfile}?uid=${other.userId}',
+                  ),
           ),
         ],
       ),

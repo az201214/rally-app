@@ -74,6 +74,9 @@ class DemoPlayerProfileRepository implements PlayerProfileRepository {
       });
 
   @override
+  Stream<PlayerProfile?> watchPublicProfile(String uid) => watchProfile(uid);
+
+  @override
   Future<PlayerProfile?> loadProfile(String uid) async => _profile;
 
   @override
@@ -113,6 +116,17 @@ class DemoPlayerProfileRepository implements PlayerProfileRepository {
       isVerified: true,
       createdAt: now,
       updatedAt: now,
+      bio:
+          'Competitive right-side player who values composed, reliable matches.',
+      playingHand: 'Right',
+      preferredDays: const <String>['Tuesday', 'Thursday', 'Saturday'],
+      preferredTimeRanges: const <String>['Evening'],
+      preferredClubIds: const <String>['padelverse-clifton'],
+      favoriteClubIds: const <String>[
+        'padelverse-clifton',
+        'the-padel-club-dha',
+      ],
+      verificationStatus: 'verified',
     );
   }
 }

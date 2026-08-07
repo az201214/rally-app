@@ -10,11 +10,13 @@ import 'demo/demo_matchmaking_repositories.dart';
 import 'demo/demo_chat_repository.dart';
 import 'demo/demo_mode.dart';
 import 'demo/demo_repositories.dart';
+import 'demo/demo_profile_insights_repository.dart';
 import 'features/authentication/application/auth_providers.dart';
 import 'features/chat/application/chat_providers.dart';
 import 'features/clubs/application/club_providers.dart';
 import 'features/clubs/data/demo_club_repository.dart';
 import 'features/matchmaking/application/matchmaking_controller.dart';
+import 'features/profile/application/profile_controller.dart';
 import 'features/notifications/application/notification_controller.dart';
 import 'features/notifications/data/firebase_notification_repository.dart';
 import 'features/notifications/data/notification_background_handler.dart';
@@ -49,6 +51,9 @@ Future<void> main() async {
           clubRepositoryProvider.overrideWithValue(DemoClubRepository()),
           clubLocationServiceProvider.overrideWithValue(
             DemoClubLocationService(),
+          ),
+          profileInsightsRepositoryProvider.overrideWithValue(
+            DemoProfileInsightsRepository(),
           ),
           pushMessagingGatewayProvider.overrideWithValue(
             NoopPushMessagingGateway(),

@@ -82,6 +82,8 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.ensureVisible(find.byKey(const Key('view-club-button')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('view-club-button')));
     await tester.pumpAndSettle();
 
@@ -105,8 +107,13 @@ void main() {
 
     await tester.pumpWidget(buildFlow());
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -900));
-    await tester.pump();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('view-club-button')),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.byKey(const Key('view-club-button')));
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.byKey(const Key('view-club-button')));
@@ -150,6 +157,11 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('edit-profile-button')));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('save-profile-button')),
+      400,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.tap(find.byKey(const Key('save-profile-button')));
     await tester.pumpAndSettle();
     expect(profiles.updateCalls, 1);

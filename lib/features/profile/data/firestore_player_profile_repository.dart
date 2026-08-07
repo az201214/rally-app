@@ -12,9 +12,20 @@ class FirestorePlayerProfileRepository implements PlayerProfileRepository {
   DocumentReference<Map<String, dynamic>> _document(String uid) =>
       _firestore.collection('users').doc(uid);
 
+  DocumentReference<Map<String, dynamic>> _publicDocument(String uid) =>
+      _firestore.collection('publicProfiles').doc(uid);
+
   @override
   Stream<PlayerProfile?> watchProfile(String uid) =>
       _document(uid).snapshots().map(
+        (snapshot) => snapshot.exists
+            ? PlayerProfile.fromMap(snapshot.data()!, uid: snapshot.id)
+            : null,
+      );
+
+  @override
+  Stream<PlayerProfile?> watchPublicProfile(String uid) =>
+      _publicDocument(uid).snapshots().map(
         (snapshot) => snapshot.exists
             ? PlayerProfile.fromMap(snapshot.data()!, uid: snapshot.id)
             : null,
@@ -37,7 +48,10 @@ class FirestorePlayerProfileRepository implements PlayerProfileRepository {
       final data = profile.toMap()
         ..['createdAt'] = FieldValue.serverTimestamp()
         ..['updatedAt'] = FieldValue.serverTimestamp();
-      await _document(profile.uid).set(data);
+      final batch = _firestore.batch()
+        ..set(_document(profile.uid), data)
+        ..set(_publicDocument(profile.uid), _publicData(profile));
+      await batch.commit();
     } on FirebaseException catch (error) {
       throw ProfileFailure(_message(error));
     }
@@ -51,7 +65,14 @@ class FirestorePlayerProfileRepository implements PlayerProfileRepository {
         ..remove('email')
         ..remove('createdAt')
         ..['updatedAt'] = FieldValue.serverTimestamp();
-      await _document(profile.uid).update(data);
+      final batch = _firestore.batch()
+        ..update(_document(profile.uid), data)
+        ..set(
+          _publicDocument(profile.uid),
+          _publicData(profile),
+          SetOptions(merge: true),
+        );
+      await batch.commit();
     } on FirebaseException catch (error) {
       throw ProfileFailure(_message(error));
     }
@@ -64,4 +85,26 @@ class FirestorePlayerProfileRepository implements PlayerProfileRepository {
     'not-found' => 'Your player profile could not be found.',
     _ => 'Your profile could not be saved. Please try again.',
   };
+
+  static Map<String, Object?> _publicData(PlayerProfile profile) =>
+      <String, Object?>{
+        'uid': profile.uid,
+        'fullName': profile.fullName,
+        'photoUrl': profile.photoUrl,
+        'bio': profile.bio,
+        'city': profile.city,
+        'skillLevel': profile.skillLevel,
+        'preferredSide': profile.preferredSide,
+        'playingHand': profile.playingHand,
+        'playingStyle': profile.playingStyle,
+        'preferredDays': profile.preferredDays,
+        'preferredTimeRanges': profile.preferredTimeRanges,
+        'preferredClubIds': profile.preferredClubIds,
+        'favoriteClubIds': profile.favoriteClubIds,
+        'verificationStatus': profile.hasTrustedVerification
+            ? 'verified'
+            : 'unverified',
+        'createdAt': profile.createdAt,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
 }

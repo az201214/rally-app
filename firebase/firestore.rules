@@ -32,7 +32,10 @@ service cloud.firestore {
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.email == request.auth.token.email;
       allow update: if signedIn() && request.auth.uid == userId
-                    && unchanged(['uid', 'email', 'createdAt']);
+                    && unchanged(['uid', 'email', 'createdAt', 'isVerified',
+                      'verificationStatus', 'reliabilityScore', 'rating',
+                      'matchesPlayed', 'matchesAccepted', 'matchesCompleted',
+                      'cancellations', 'noShows']);
       allow delete: if false;
 
       match /deviceTokens/{tokenId} {
@@ -51,6 +54,27 @@ service cloud.firestore {
                       && unchanged(['id', 'userId', 'token', 'createdAt']);
         allow delete: if signedIn() && request.auth.uid == userId;
       }
+    }
+
+    match /publicProfiles/{userId} {
+      function safePublicKeys() {
+        return request.resource.data.keys().hasOnly([
+          'uid', 'fullName', 'photoUrl', 'bio', 'city', 'skillLevel',
+          'preferredSide', 'playingHand', 'playingStyle', 'preferredDays',
+          'preferredTimeRanges', 'preferredClubIds', 'favoriteClubIds',
+          'verificationStatus', 'createdAt', 'updatedAt'
+        ]);
+      }
+      allow read: if signedIn();
+      allow create: if owner(request.resource.data.uid)
+                    && request.resource.data.uid == userId
+                    && request.resource.data.verificationStatus == 'unverified'
+                    && safePublicKeys();
+      allow update: if owner(resource.data.uid)
+                    && request.resource.data.uid == userId
+                    && unchanged(['uid', 'createdAt', 'verificationStatus'])
+                    && safePublicKeys();
+      allow delete: if false;
     }
 
     match /clubs/{clubId} {

@@ -16,6 +16,14 @@ class PlayerProfile {
     required this.isVerified,
     required this.createdAt,
     required this.updatedAt,
+    this.bio = '',
+    this.playingHand = 'Right',
+    this.preferredDays = const <String>[],
+    this.preferredTimeRanges = const <String>[],
+    this.preferredClubIds = const <String>[],
+    this.favoriteClubIds = const <String>[],
+    this.achievementIds = const <String>[],
+    this.verificationStatus = 'unverified',
   });
 
   factory PlayerProfile.newPlayer({
@@ -41,6 +49,7 @@ class PlayerProfile {
       isVerified: false,
       createdAt: now,
       updatedAt: now,
+      preferredClubIds: const <String>[],
     );
   }
 
@@ -65,6 +74,22 @@ class PlayerProfile {
       isVerified: map['isVerified'] == true,
       createdAt: _date(map['createdAt']),
       updatedAt: _date(map['updatedAt']),
+      bio: _string(map['bio']),
+      playingHand: _string(map['playingHand'], fallback: 'Right'),
+      preferredDays: _strings(map['preferredDays']),
+      preferredTimeRanges: _strings(map['preferredTimeRanges']),
+      preferredClubIds: _strings(
+        map['preferredClubIds'],
+        fallback: _string(map['homeClubId']).isEmpty
+            ? const <String>[]
+            : <String>[_string(map['homeClubId'])],
+      ),
+      favoriteClubIds: _strings(map['favoriteClubIds']),
+      achievementIds: _strings(map['achievementIds']),
+      verificationStatus: _string(
+        map['verificationStatus'],
+        fallback: map['isVerified'] == true ? 'verified' : 'unverified',
+      ),
     );
   }
 
@@ -84,9 +109,32 @@ class PlayerProfile {
   final bool isVerified;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String bio;
+  final String playingHand;
+  final List<String> preferredDays;
+  final List<String> preferredTimeRanges;
+  final List<String> preferredClubIds;
+  final List<String> favoriteClubIds;
+  final List<String> achievementIds;
+  final String verificationStatus;
 
-  bool get isComplete =>
-      fullName.isNotEmpty && city.isNotEmpty && homeClubId.isNotEmpty;
+  List<String> get missingProfileFields => <String>[
+    if (fullName.isEmpty) 'display name',
+    if (bio.isEmpty) 'bio',
+    if (city.isEmpty) 'city',
+    if (skillLevel.isEmpty) 'skill level',
+    if (preferredDays.isEmpty) 'preferred days',
+    if (preferredTimeRanges.isEmpty) 'preferred times',
+    if (preferredClubIds.isEmpty && homeClubId.isEmpty) 'preferred club',
+  ];
+
+  int get profileCompletion =>
+      (((7 - missingProfileFields.length) / 7) * 100).round().clamp(0, 100);
+
+  bool get isComplete => missingProfileFields.isEmpty;
+
+  bool get hasTrustedVerification =>
+      verificationStatus == 'verified' || isVerified;
 
   Map<String, Object?> toMap() => <String, Object?>{
     'uid': uid,
@@ -105,6 +153,14 @@ class PlayerProfile {
     'isVerified': isVerified,
     'createdAt': createdAt,
     'updatedAt': updatedAt,
+    'bio': bio,
+    'playingHand': playingHand,
+    'preferredDays': preferredDays,
+    'preferredTimeRanges': preferredTimeRanges,
+    'preferredClubIds': preferredClubIds,
+    'favoriteClubIds': favoriteClubIds,
+    'achievementIds': achievementIds,
+    'verificationStatus': verificationStatus,
   };
 
   PlayerProfile copyWith({
@@ -116,6 +172,12 @@ class PlayerProfile {
     String? city,
     int? searchRadiusKm,
     DateTime? updatedAt,
+    String? bio,
+    String? playingHand,
+    List<String>? preferredDays,
+    List<String>? preferredTimeRanges,
+    List<String>? preferredClubIds,
+    List<String>? favoriteClubIds,
   }) => PlayerProfile(
     uid: uid,
     fullName: fullName ?? this.fullName,
@@ -133,6 +195,14 @@ class PlayerProfile {
     isVerified: isVerified,
     createdAt: createdAt,
     updatedAt: updatedAt ?? DateTime.now().toUtc(),
+    bio: bio ?? this.bio,
+    playingHand: playingHand ?? this.playingHand,
+    preferredDays: preferredDays ?? this.preferredDays,
+    preferredTimeRanges: preferredTimeRanges ?? this.preferredTimeRanges,
+    preferredClubIds: preferredClubIds ?? this.preferredClubIds,
+    favoriteClubIds: favoriteClubIds ?? this.favoriteClubIds,
+    achievementIds: achievementIds,
+    verificationStatus: verificationStatus,
   );
 
   static String _string(Object? value, {String fallback = ''}) =>
@@ -145,6 +215,18 @@ class PlayerProfile {
 
   static double _double(Object? value, {double fallback = 0}) =>
       value is num ? value.toDouble() : double.tryParse('$value') ?? fallback;
+
+  static List<String> _strings(
+    Object? value, {
+    List<String> fallback = const <String>[],
+  }) => value is Iterable
+      ? value
+            .whereType<String>()
+            .map((item) => item.trim())
+            .where((item) => item.isNotEmpty)
+            .toSet()
+            .toList(growable: false)
+      : fallback;
 
   static DateTime _date(Object? value) {
     if (value is DateTime) return value.toUtc();

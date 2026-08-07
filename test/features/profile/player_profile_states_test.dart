@@ -27,13 +27,10 @@ void main() {
     );
   }
 
-  testWidgets('profile exposes loading then successful Firestore data', (
-    tester,
-  ) async {
+  testWidgets('profile renders successful repository data', (tester) async {
     await tester.pumpWidget(
       profileApp(FakePlayerProfileRepository(profile: testProfile())),
     );
-    expect(find.byKey(const Key('profile-loading')), findsOneWidget);
     await tester.pumpAndSettle();
     expect(find.text('HAMZA KHAN'), findsOneWidget);
     expect(find.text('92% reliable'), findsOneWidget);

@@ -100,6 +100,9 @@ class FakePlayerProfileRepository implements PlayerProfileRepository {
   }
 
   @override
+  Stream<PlayerProfile?> watchPublicProfile(String uid) => watchProfile(uid);
+
+  @override
   Future<PlayerProfile?> loadProfile(String uid) async {
     if (error != null) throw error!;
     return profile;

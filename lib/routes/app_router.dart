@@ -13,6 +13,7 @@ import '../features/clubs/presentation/screens/club_discovery_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/match/presentation/screens/match_details_screen.dart';
 import '../features/match/presentation/screens/match_found_screen.dart';
+import '../features/matchmaking/domain/matchmaking_models.dart';
 import '../features/searching/presentation/screens/searching_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/profile/presentation/screens/player_profile_screen.dart';
@@ -110,7 +111,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.matchDetails,
-        builder: (context, state) => const MatchDetailsScreen(),
+        builder: (context, state) => MatchDetailsScreen(
+          match: state.extra is RallyMatch ? state.extra! as RallyMatch : null,
+        ),
       ),
       GoRoute(
         path: AppRoutes.matchChat,
@@ -138,7 +141,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.playerProfile,
-        builder: (context, state) => const PlayerProfileScreen(),
+        builder: (context, state) =>
+            PlayerProfileScreen(playerId: state.uri.queryParameters['uid']),
       ),
       GoRoute(
         path: AppRoutes.clubs,

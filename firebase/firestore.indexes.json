@@ -31,6 +31,14 @@
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "scheduledStart", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "matches",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "participantIds", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "scheduledStart", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

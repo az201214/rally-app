@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rally/app/rally_app.dart';
+import 'package:rally/demo/demo_profile_insights_repository.dart';
 import 'package:rally/features/authentication/application/auth_providers.dart';
 import 'package:rally/features/authentication/domain/auth_failure.dart';
 import 'package:rally/features/authentication/domain/auth_user.dart';
 import 'package:rally/features/authentication/presentation/screens/login_screen.dart';
 import 'package:rally/routes/app_router.dart';
+import 'package:rally/features/profile/application/profile_controller.dart';
 import 'package:rally/theme/app_theme.dart';
 
 import '../../helpers/fake_repositories.dart';
@@ -109,6 +111,9 @@ void main() {
         authRepositoryProvider.overrideWithValue(auth),
         playerProfileRepositoryProvider.overrideWithValue(
           FakePlayerProfileRepository(profile: testProfile()),
+        ),
+        profileInsightsRepositoryProvider.overrideWithValue(
+          DemoProfileInsightsRepository(),
         ),
       ],
     );
